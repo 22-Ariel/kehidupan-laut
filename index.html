@@ -1,20 +1,54 @@
-<!-- Hiu sebagai wadah utama -->
-<a-entity 
-    id="hiu-container"
-    position="0 0 0"
-    animation__pos="property: position; to: 10 0 0; dur: 12000; easing: linear; loop: true; dir: alternate;"
-    animation__rot="property: rotation; to: 0 360 0; dur: 12000; easing: linear; loop: true;"
->
-    <!-- Model Hiu -->
-    <a-gltf-model 
-        id="hiu"
-        src="#hiu-model"
-        position="0 0 0"
-        tail-whip="speed: 1.8; amplitude: 18;"
-    >
-    </a-gltf-model>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kehidupan Laut: Hiu</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    
+    <script>
+        // Komponen untuk ayunan ekor agar terlihat luwes
+        AFRAME.registerComponent('tail-whip', {
+            schema: { speed: {default: 2}, amplitude: {default: 15} },
+            tick: function (time, timeDelta) {
+                var angle = Math.sin(time * this.data.speed / 500) * this.data.amplitude;
+                this.el.setAttribute('rotation', {x: 0, y: angle, z: 0});
+            }
+        });
+    </script>
+</head>
+<body>
 
-    <!-- Kamera diposisikan tepat di depan mata hiu -->
-    <!-- Sesuaikan nilai 'position' jika dirasa terlalu dekat/jauh -->
-    <a-camera position="0 0.5 1.5" rotation="0 180 0"></a-camera>
-</a-entity>
+    <a-scene background="color: #003366">
+        <a-assets>
+            <a-asset-item id="hiu-model" src="kehidupan_laut.glb"></a-asset-item>
+            <audio id="musik-laut" src="musik.mp3" loop="true" preload="auto"></audio>
+        </a-assets>
+
+        <!-- Kamera diposisikan statis di depan hiu -->
+        <a-camera position="0 0.5 2" look-controls="enabled: true"></a-camera>
+
+        <!-- Hiu dengan animasi maju-mundur -->
+        <a-entity 
+            id="hiu-container"
+            position="0 0 0"
+            animation__majuMundur="property: position; to: 0 0 -8; dur: 4000; easing: linear; loop: true; dir: alternate;"
+        >
+            <a-gltf-model 
+                id="hiu"
+                src="#hiu-model"
+                rotation="0 180 0" 
+                tail-whip="speed: 1.5; amplitude: 10;"
+            >
+            </a-gltf-model>
+        </a-entity>
+
+        <!-- Suara -->
+        <a-entity sound="src: #musik-laut; autoplay: true; loop: true; volume: 0.8;"></a-entity>
+        
+        <!-- Pencahayaan -->
+        <a-light type="ambient" intensity="0.7"></a-light>
+        <a-light type="directional" position="1 2 1" intensity="1"></a-light>
+    </a-scene>
+
+</body>
+</html>
