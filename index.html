@@ -12,16 +12,22 @@
       
       <!-- Aset suara -->
       <a-assets>
-        <audio id="musik-laut" src="sounds/musik.mp3" loop="true"></audio>
+        <audio id="musik-laut" src="sounds/musik.mp3" loop="true" preload="auto"></audio>
       </a-assets>
 
-      <!-- Menggunakan markerhandler agar suara terpicu saat marker terdeteksi -->
+      <!-- Marker Hiro -->
       <a-marker preset="hiro" id="marker-hiro">
+        
+        <!-- PENGATURAN POSISI BARU -->
+        <!-- Ubah rotation="-90 0 0" (samping) menjadi rotation="-90 90 0" (depan) -->
+        <!-- Ubah position="-0.3 0 0" sedikit ke kiri agar manatee di tengah -->
         <a-entity gltf-model="kehidupan_2laut.glb" 
-                  scale="0.2 0.2 0.2" 
-                  rotation="-90 0 0" 
+                  scale="0.25 0.25 0.25" 
+                  rotation="-90 90 0" 
+                  position="-0.3 0 0"
                   animation-mixer>
         </a-entity>
+
       </a-marker>
       
       <a-entity camera></a-entity>
@@ -31,14 +37,31 @@
       const marker = document.querySelector('#marker-hiro');
       const music = document.querySelector('#musik-laut');
 
-      marker.addEventListener('markerFound', () => {
-        music.play();
-      });
+      // Fungsi untuk play suara
+      const startSound = () => {
+        if (music.paused) {
+            music.play().catch(error => console.log("Gagal play otomatis, butuh interaksi user:", error));
+        }
+      };
 
-      marker.addEventListener('markerLost', () => {
+      // Fungsi untuk pause suara
+      const stopSound = () => {
         music.pause();
-        music.currentTime = 0; // Reset ke awal saat marker hilang
+        music.currentTime = 0;
+      };
+
+      // Event Listener saat marker terdeteksi
+      marker.addEventListener('markerFound', startSound);
+      // Event Listener saat marker hilang
+      marker.addEventListener('markerLost', stopSound);
+
+      // Tambahan: Pastikan audio siap diputar
+      window.addEventListener('load', () => {
+          music.load();
       });
+      
+      // Tambahan: Memicu suara jika browser memblokir autoplay (harus tap layar)
+      document.body.addEventListener('click', startSound, { once: true });
     </script>
   </body>
 </html>
