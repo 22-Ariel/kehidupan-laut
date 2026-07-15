@@ -1,67 +1,100 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Menstra AR</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-  </head>
-  <body style="margin: 0px; overflow: hidden;">
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kehidupan Laut: Hiu Berenang Luwes</title>
+    <!-- A-Frame Library -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-      
-      <!-- Aset suara -->
-      <a-assets>
-        <audio id="musik-laut" src="sounds/musik.mp3" loop="true" preload="auto"></audio>
-      </a-assets>
+    <!-- Library Tambahan untuk Gerakan Fisika (opsional, tapi bikin lebih realistis) -->
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    
+    <script>
+        // Komponen kustom untuk animasi sirip ekor yang berayun
+        AFRAME.registerComponent('tail-whip', {
+            schema: {
+                speed: {default: 1.5},
+                amplitude: {default: 15}
+            },
+            tick: function (time, timeDelta) {
+                var entity = this.el;
+                var data = this.data;
+                // Menggunakan fungsi sinus untuk gerakan sirip ekor yang ritmis
+                var angle = Math.sin(time * data.speed / 500) * data.amplitude;
+                entity.setAttribute('rotation', {x: 0, y: angle, z: 0});
+            }
+        });
+    </script>
+</head>
+<body style="margin: 0; overflow: hidden;">
 
-      <!-- Marker Hiro -->
-      <a-marker preset="hiro" id="marker-hiro">
+    <a-scene background="color: #003366" physics>
+        <!-- Aset Hiu dan Suara -->
+        <a-assets>
+            <a-asset-item id="hiu-model" src="kehidupan_laut.glb"></a-asset-item>
+            <!-- Pastikan file musik.mp3 sudah ada di folder yang sama dengan index.html -->
+            <audio id="musik-laut" src="musik.mp3" loop="true" preload="auto"></audio>
+        </a-assets>
+
+        <!-- Kamera dengan kontrol mouse/sentuh -->
+        <a-camera position="0 1.6 0"></a-camera>
+
+        <!-- Panggung Laut -->
+        <a-entity id="stage" position="0 0 -5">
+            <!-- Dasar Laut -->
+            <a-plane position="0 -10 0" rotation="-90 0 0" width="50" height="50" color="#1a5376"></a-plane>
+            <a-sky color="#001f3f"></a-sky>
+
+            <!-- Hiu Berenang Luwes -->
+            <a-entity 
+                id="hiu-container"
+                position="0 0 0"
+                rotation="0 90 0"
+                
+                // 1. ANIMASI LINGKARAN: Hiu akan berenang memutar sejauh 10 meter, 
+                //    selama 12 detik, tanpa henti.
+                animation__pos="property: position; to: 10 0 0; dur: 12000; easing: linear; loop: true; dir: alternate;"
+                animation__rot="property: rotation; to: 0 450 0; dur: 12000; easing: linear; loop: true; dir: alternate;"
+            >
+                <a-gltf-model 
+                    id="hiu"
+                    src="#hiu-model"
+                    position="0 0 0"
+                    rotation="0 0 0"
+                    scale="1 1 1"
+                    
+                    // 2. ANIMASI SIRIP EKOR: Hiu akan menggerakkan siripnya (komponen kustom)
+                    tail-whip="speed: 1.8; amplitude: 18;" 
+
+                    // 3. ANIMASI KEMIRINGAN: Hiu sedikit miring saat berbelok (opsional, untuk realisme)
+                    animation__tilt="property: rotation; to: 0 0 5; dur: 6000; easing: easeInOutSine; loop: true; dir: alternate;"
+                >
+                </a-gltf-model>
+            </a-entity>
+
+            <!-- Cahaya Ambient -->
+            <a-light type="ambient" color="#fff" intensity="0.5"></a-light>
+            <a-light type="directional" color="#fff" intensity="1" position="-1 2 1"></a-light>
+        </a-entity>
+
+        <!-- Musik Latar -->
+        <a-entity sound="src: #musik-laut; autoplay: true; loop: true; volume: 0.8;"></a-entity>
         
-        <!-- PENGATURAN POSISI BARU -->
-        <!-- Ubah rotation="-90 0 0" (samping) menjadi rotation="-90 90 0" (depan) -->
-        <!-- Ubah position="-0.3 0 0" sedikit ke kiri agar manatee di tengah -->
-       <a-entity gltf-model="kehidupan_2laut.glb" 
-          scale="0.25 0.25 0.25" 
-          rotation="-180 0 180"  <-- Ganti dengan ini
-          position="-0.3 0 0"
-          animation-mixer>
-      </a-entity>
+        <!-- Teks Informasi -->
+        <a-text value="Gerakan Hiu Lebih Luwes" align="center" position="0 2.5 -4" color="white"></a-text>
 
-      </a-marker>
-      
-      <a-entity camera></a-entity>
     </a-scene>
 
+    <!-- Script Tambahan: Untuk memutar suara setelah interaksi pengguna (wajib di browser modern) -->
     <script>
-      const marker = document.querySelector('#marker-hiro');
-      const music = document.querySelector('#musik-laut');
-
-      // Fungsi untuk play suara
-      const startSound = () => {
-        if (music.paused) {
-            music.play().catch(error => console.log("Gagal play otomatis, butuh interaksi user:", error));
-        }
-      };
-
-      // Fungsi untuk pause suara
-      const stopSound = () => {
-        music.pause();
-        music.currentTime = 0;
-      };
-
-      // Event Listener saat marker terdeteksi
-      marker.addEventListener('markerFound', startSound);
-      // Event Listener saat marker hilang
-      marker.addEventListener('markerLost', stopSound);
-
-      // Tambahan: Pastikan audio siap diputar
-      window.addEventListener('load', () => {
-          music.load();
-      });
-      
-      // Tambahan: Memicu suara jika browser memblokir autoplay (harus tap layar)
-      document.body.addEventListener('click', startSound, { once: true });
+        var scene = document.querySelector('a-scene');
+        scene.addEventListener('enter-vr', function () {
+             document.querySelector('[sound]').components.sound.playSound();
+        });
+         scene.addEventListener('exit-vr', function () {
+             document.querySelector('[sound]').components.sound.pauseSound();
+        });
     </script>
-  </body>
+
+</body>
 </html>
