@@ -10,29 +10,35 @@
     
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
       
-      <!-- Menambahkan aset suara di sini agar lebih stabil -->
+      <!-- Aset suara -->
       <a-assets>
-        <audio id="musik-laut" src="sounds/musik.mp3" preload="auto"></audio>
+        <audio id="musik-laut" src="sounds/musik.mp3" loop="true"></audio>
       </a-assets>
 
-      <a-marker preset="hiro">
+      <!-- Menggunakan markerhandler agar suara terpicu saat marker terdeteksi -->
+      <a-marker preset="hiro" id="marker-hiro">
         <a-entity gltf-model="kehidupan_2laut.glb" 
                   scale="0.2 0.2 0.2" 
                   rotation="-90 0 0" 
-                  animation-mixer
-                  sound="src: #musik-laut; autoplay: true; loop: true; volume: 1;">
+                  animation-mixer>
         </a-entity>
       </a-marker>
       
       <a-entity camera></a-entity>
-      
-      <!-- Tambahan: Memaksa suara untuk mulai saat layar disentuh pertama kali -->
-      <script>
-        document.querySelector('a-scene').addEventListener('click', function () {
-            let soundEntity = document.querySelector('[sound]');
-            soundEntity.components.sound.playSound();
-        });
-      </script>
     </a-scene>
+
+    <script>
+      const marker = document.querySelector('#marker-hiro');
+      const music = document.querySelector('#musik-laut');
+
+      marker.addEventListener('markerFound', () => {
+        music.play();
+      });
+
+      marker.addEventListener('markerLost', () => {
+        music.pause();
+        music.currentTime = 0; // Reset ke awal saat marker hilang
+      });
+    </script>
   </body>
 </html>
