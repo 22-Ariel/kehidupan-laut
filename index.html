@@ -2,14 +2,18 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Kehidupan Laut: Hiu</title>
+    <title>Kehidupan Laut: Hiu Berenang</title>
+    <!-- A-Frame Library -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     
+    <!-- Library tambahan untuk komponen 'look-at' (sangat penting!) -->
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    
     <script>
-        // Komponen untuk ayunan ekor agar terlihat luwes
+        // Komponen Kustom: Ayunan Ekor Luwes
         AFRAME.registerComponent('tail-whip', {
-            schema: { speed: {default: 2}, amplitude: {default: 15} },
-            tick: function (time, timeDelta) {
+            schema: { speed: {default: 2.5}, amplitude: {default: 20} },
+            tick: function (time) {
                 var angle = Math.sin(time * this.data.speed / 500) * this.data.amplitude;
                 this.el.setAttribute('rotation', {x: 0, y: angle, z: 0});
             }
@@ -24,31 +28,54 @@
             <audio id="musik-laut" src="musik.mp3" loop="true" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera diposisikan statis di depan hiu -->
-        <a-camera position="0 0.5 2" look-controls="enabled: true"></a-camera>
+        <!-- KAMERA: Posisinya sedikit di atas pusat, menghadap ke area berenang -->
+        <a-camera position="0 1.6 3" look-controls="enabled: true"></a-camera>
 
-        <!-- Hiu dengan animasi maju-mundur -->
+        <!-- HiU (Wadah Utama) -->
         <a-entity 
             id="hiu-container"
-            position="0 0 0"
-            animation__majuMundur="property: position; to: 0 0 -8; dur: 4000; easing: linear; loop: true; dir: alternate;"
+            position="0 0 -5"
+            
+            // 1. Animasi Maju Mundur
+            animation__majuMundur="property: position; to: 0 0 -15; dur: 5000; easing: linear; loop: true; dir: alternate;"
+            
+            // 2. Animasi Berenang Memutar (Opsional, biar dinamis)
+            animation__putar="property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true;"
         >
+            <!-- Model Hiu 3D -->
             <a-gltf-model 
-                id="hiu"
+                id="hiu-model-3d"
                 src="#hiu-model"
-                rotation="0 180 0" 
-                tail-whip="speed: 1.5; amplitude: 10;"
+                scale="1 1 1"
+                
+                // PENTING: Hiu akan selalu menghadap kamera utama
+                look-at="#kamera-utama"
+                
+                // Ayunan Ekor Luwes
+                tail-whip="speed: 2.8; amplitude: 25;"
             >
             </a-gltf-model>
         </a-entity>
-
-        <!-- Suara -->
-        <a-entity sound="src: #musik-laut; autoplay: true; loop: true; volume: 0.8;"></a-entity>
         
-        <!-- Pencahayaan -->
-        <a-light type="ambient" intensity="0.7"></a-light>
-        <a-light type="directional" position="1 2 1" intensity="1"></a-light>
+        <!-- Agar look-at berfungsi presisi, kita beri ID pada kamera -->
+        <a-entity id="kamera-utama" position="0 1.6 3"></a-entity>
+
+        <!-- Musik Latar -->
+        <a-entity sound="src: #musik-laut; autoplay: true; loop: true; volume: 0.5;"></a-entity>
+        
+        <!-- Cahaya -->
+        <a-light type="ambient" color="#fff" intensity="0.8"></a-light>
     </a-scene>
+
+    <!-- Tombol paksa putar musik (wajib di browser modern) -->
+    <script>
+        window.addEventListener('click', function () {
+            var soundEntity = document.querySelector('[sound]');
+            if (soundEntity.components.sound) {
+                soundEntity.components.sound.playSound();
+            }
+        });
+    </script>
 
 </body>
 </html>
