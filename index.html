@@ -2,36 +2,84 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Kehidupan Laut</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Kehidupan Laut - AR</title>
+
+    <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <!-- AR.js untuk A-Frame (WAJIB agar bisa scan marker Hiro) -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; }
+        .arjs-loader {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .arjs-loader div {
+            color: white;
+            font-size: 1.25em;
+            font-family: sans-serif;
+        }
+    </style>
 </head>
 <body>
 
-    <a-scene background="color: #003366">
+    <div class="arjs-loader">
+        <div>Memuat AR, mohon tunggu...</div>
+    </div>
+
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        vr-mode-ui="enabled: false"
+        renderer="logarithmicDepthBuffer: true;"
+    >
         <a-assets>
             <!-- Menggunakan nama file yang sesuai dengan struktur folder kamu -->
             <a-asset-item id="hiu-model" src="kehidupan_2laut.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Kamera di depan objek -->
-        <a-camera position="0 1.6 3"></a-camera>
+        <!-- Marker Hiro standar bawaan AR.js -->
+        <a-marker preset="hiro" id="marker" raycaster="objects: .clickable" emitevents="true">
 
-        <!-- Wadah Hiu -->
-        <a-entity 
-            id="hiu-container"
-            position="0 0 -5"
-            animation="property: position; to: 0 0 -15; dur: 5000; easing: linear; loop: true; dir: alternate;"
-        >
-            <a-gltf-model 
-                id="hiu"
-                src="#hiu-model"
-                rotation="0 180 0"
+            <!-- Wadah Hiu, posisinya relatif terhadap marker -->
+            <a-entity
+                id="hiu-container"
+                position="0 0.5 0"
+                scale="0.25 0.25 0.25"
+                animation="property: position; to: 0 0.5 -1.5; dur: 5000; easing: linear; loop: true; dir: alternate;"
             >
-            </a-gltf-model>
-        </a-entity>
+                <a-gltf-model
+                    id="hiu"
+                    src="#hiu-model"
+                    rotation="0 180 0"
+                    class="clickable"
+                ></a-gltf-model>
+            </a-entity>
 
-        <a-light type="ambient" intensity="0.8"></a-light>
+        </a-marker>
+
+        <!-- Kamera AR (menggantikan a-camera biasa) -->
+        <a-entity camera></a-entity>
+
     </a-scene>
+
+    <script>
+        // Sembunyikan loader begitu scene AR siap
+        const scene = document.querySelector('a-scene');
+        scene.addEventListener('loaded', () => {
+            document.querySelector('.arjs-loader').style.display = 'none';
+        });
+    </script>
 
 </body>
 </html>
