@@ -8,27 +8,30 @@
   </head>
   <body style="margin: 0px; overflow: hidden;">
     
-    <!-- Memanggil musik dari folder sounds -->
-    <audio id="suara-laut" src="sounds/musik.mp3" loop="true"></audio>
-
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
       
+      <!-- Menambahkan aset suara di sini agar lebih stabil -->
+      <a-assets>
+        <audio id="musik-laut" src="sounds/musik.mp3" preload="auto"></audio>
+      </a-assets>
+
       <a-marker preset="hiro">
-        <!-- Rotasi diubah agar model menghadap ke depan -->
         <a-entity gltf-model="kehidupan_2laut.glb" 
                   scale="0.2 0.2 0.2" 
                   rotation="-90 0 0" 
-                  animation-mixer>
+                  animation-mixer
+                  sound="src: #musik-laut; autoplay: true; loop: true; volume: 1;">
         </a-entity>
       </a-marker>
       
       <a-entity camera></a-entity>
       
-      <!-- Skrip untuk play suara -->
+      <!-- Tambahan: Memaksa suara untuk mulai saat layar disentuh pertama kali -->
       <script>
-        document.body.addEventListener('click', () => {
-          document.querySelector('#suara-laut').play();
-        }, { once: true });
+        document.querySelector('a-scene').addEventListener('click', function () {
+            let soundEntity = document.querySelector('[sound]');
+            soundEntity.components.sound.playSound();
+        });
       </script>
     </a-scene>
   </body>
