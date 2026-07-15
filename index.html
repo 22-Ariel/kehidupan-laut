@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Menstra AR - Kehidupan Laut</title>
+    <title>Menstra AR</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
   </head>
   <body style="margin: 0px; overflow: hidden;">
     
-    <!-- Menambahkan audio -->
-    <audio id="suara-laut" src="suara/laut.mp3" loop="true" preload="auto"></audio>
+    <!-- Memanggil musik dari folder sounds -->
+    <audio id="suara-laut" src="sounds/musik.mp3" loop="true"></audio>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
       
-      <a-marker preset="hiro" emitevents="true" button>
-        <!-- Memutar rotasi sebesar -90 derajat agar menghadap ke depan, bukan ke atas -->
+      <a-marker preset="hiro">
+        <!-- Rotasi diubah agar model menghadap ke depan -->
         <a-entity gltf-model="kehidupan_2laut.glb" 
                   scale="0.2 0.2 0.2" 
                   rotation="-90 0 0" 
@@ -24,11 +24,11 @@
       
       <a-entity camera></a-entity>
       
-      <!-- Skrip sederhana untuk menyalakan suara saat menyentuh layar -->
+      <!-- Skrip untuk play suara -->
       <script>
-        window.addEventListener('click', () => {
+        document.body.addEventListener('click', () => {
           document.querySelector('#suara-laut').play();
-        });
+        }, { once: true });
       </script>
     </a-scene>
   </body>
